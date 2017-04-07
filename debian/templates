@@ -1,0 +1,14 @@
+Template: iserv-client-print/iservIP
+Type: string
+Description: IServ IP:
+ Please enter your IServ's IP address.
+Description-de.UTF-8: IServ IP:
+ Bitte geben Sie die IP-Adresse des IServs ein.
+
+Template: iserv-client-print/useIP
+Type: boolean
+Default: false
+Description: Should a manually entered IP be used?
+ The IP will be used for setting up the mount point for the netlogon share.
+Description-de.UTF-8: Soll die IP des IServ manuell eingegeben werden?
+ Die IP wird benutzt, um den Mountpoint für die Netlogon-Freigabe einzurichten.

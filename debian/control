@@ -1,0 +1,23 @@
+Source: stsbl-iserv-client-print
+Section: misc
+Priority: extra
+Maintainer: Stadtteilschule Blankenese <repository@stsbl.de>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.5
+Homepage: https://it.stsbl.de/doc/client/stsbl-iserv-client-print
+
+Package: stsbl-iserv-client-print
+Architecture: all
+Depends: perl-base, iserv-client, libnet-address-ip-local-perl, libjson-perl, libnet-cups-perl
+Description: IServ Client Integration - Druckunterstützung
+ IServ ist nicht nur der perfekte Server für das lokale Netzwerk, IServ
+ ist vor allem ein mächtiger Kommunikationsserver, der eine neue,
+ flexiblere und individuellere Art des Lehrens und Lernens ermöglicht -
+ jahrgangs- und fächerübergreifend, unabhängig von örtlichen
+ Gegebenheiten und dem in der Schule üblichen Zeitraster. Der Zugriff
+ erfolgt plattformunabhängig mittels eines gewöhnlichen Internet-
+ Browsers über eine konsistente und intuitiv bedienbare Weboberfläche.
+ .
+ Dieses Paket erlaubt direktes Drucken über im IServ Druckmodul
+ eingebundene Drucker.
+Tag: suite::iserv, use::print

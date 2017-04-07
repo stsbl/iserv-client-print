@@ -1,0 +1,4 @@
+etc/*			/etc/
+lib/*  			/usr/lib/iserv/
+share/*			/usr/share/iserv/
+debian/changelog	DEBIAN/

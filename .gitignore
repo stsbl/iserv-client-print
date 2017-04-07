@@ -1,0 +1,5 @@
+debian/stsbl-iserv-client-print/*
+debian/stsbl-iserv-client-print.substvars
+debian/stsbl-iserv-client-print.debhelper.log
+debian/files
+debian/debhelper-build-stamp

@@ -1,0 +1,76 @@
+#!/bin/bash -e
+
+# Source debconf library
+. /usr/share/debconf/confmodule
+
+PKG=iserv-client-print
+
+chkNetlogon() {
+  ## configure netlogon share for automounting (it is required to provide ppd + config printer setup)
+
+  ## create netlogon mount directory if neccessary
+  if [ ! -e "/var/lib/iserv/netlogon" ]
+  then
+    mkdir -pm 0755 /var/lib/iserv/netlogon
+  fi
+
+  ## remove old lines
+  NUM=$RANDOM
+  # sed does not deletes the lines on direct editing ?:(
+  sed '/<\!-- IServ Print BEGIN -->/,/<\!-- IServ Print END -->/d' /etc/iserv/security/pam_mount.conf.xml > "/tmp/pam_mount.conf-$NUM"".xml"
+  if [ -L "/etc/security/pam_mount.conf.xml" ]
+  then
+    cp "/tmp/pam_mount.conf-$NUM"".xml" "/etc/iserv/security/pam_mount.conf.xml"
+  else
+    cp "/tmp/pam_mount.conf-$NUM"".xml" "/etc/security/pam_mount.conf.xml"
+  fi
+  rm -f "/tmp/pam_mount.conf-$NUM"".xml"
+
+  ## add new lines
+  String="/Volume\ definitions/a"
+  String+="<\!-- IServ Print BEGIN -->\n"
+  String+="<volume uid=\"10000-100000\" fstype=\"cifs\" server=\"$SERVERIP\" "
+  String+="path=\"netlogon\" mountpoint=\"/var/lib/iserv/netlogon/\%(USER)\" options=\""
+  String+="iocharset=utf8,dir_mode=0700\" \/>\n"
+  String+="<\!-- IServ Print END -->\n"
+
+  ## assume that the pam_mount.conf.xml is linked by iserv-client
+  if [ -L "/etc/security/pam_mount.conf.xml" ]
+  then
+    sed -i "$String" /etc/iserv/security/pam_mount.conf.xml
+  else
+    sed -i "$String" /etc/security/pam_mount.conf.xml
+  fi
+}
+
+getIServIP() {
+  if [ "$CONF_USEIP" == "true" ]
+  then
+    SERVERIP=$CONF_ISERVIP
+  else
+    for i in `seq 1 10`;
+    do
+      SERVERIP=$(dig iserv.local +short)
+      echo "SERVERIP=$SERVERIP"
+      [[ "$SERVERIP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && break
+      echo "This was not very effective. Sleeping..."
+      sleep 2
+      [[ $i = 10 ]] && ( echo "Couldn't get IP :("; exit 8 )
+    done
+  fi
+}
+
+getDebconf() {
+  db_get $PKG/useIP
+  CONF_USEIP="${RET}"
+  db_get $PKG/iservIP
+  CONF_ISERVIP="${RET}"
+}
+
+if [ "$1" = configure -o "$1" = reconfigure ]
+then
+  getDebconf
+  getIServIP
+  chkNetlogon
+fi
+

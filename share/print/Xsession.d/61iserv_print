@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ $(id -u) -ge 10000 -a $(id -u) -le 100000 ]
+then
+  echo "IServ - Setting up printers ..."
+  if [ ! -d "$HOME/.iserv" ]
+  then
+    mkdir -pv "$HOME/.iserv"
+  fi
+
+  sudo /usr/lib/iserv/setup_printer "$USER" &> "$HOME/.iserv/printer-setup.log"
+fi

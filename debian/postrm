@@ -1,0 +1,22 @@
+#!/bin/bash -e
+
+# source debconf library
+. /usr/share/debconf/confmodule
+
+## remove lines
+NUM=$RANDOM
+# sed does not deletes the lines on direct editing ?:(
+sed '/<\!-- IServ Print BEGIN -->/,/<\!-- IServ Print END -->/d' /etc/iserv/security/pam_mount.conf.xml > "/tmp/pam_mount.conf-$NUM"".xml"
+if [ -L "/etc/security/pam_mount.conf.xml" ]
+then
+  cp "/tmp/pam_mount.conf-$NUM"".xml" "/etc/iserv/security/pam_mount.conf.xml"
+else
+  cp "/tmp/pam_mount.conf-$NUM"".xml" "/etc/security/pam_mount.conf.xml"
+fi
+rm -f "/tmp/pam_mount.conf-$NUM"".xml"
+
+if [ "$1" = purge ]
+then
+  db_purge
+fi
+

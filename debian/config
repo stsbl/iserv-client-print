@@ -1,0 +1,15 @@
+#!/bin/bash -e
+
+# Source debconf library
+. /usr/share/debconf/confmodule
+
+PKG=iserv-client-print
+
+db_input low $PKG/useIP || true
+
+db_get $PKG/useIP
+CONF_USEIP="${RET}"
+
+if [ "$CONF_USEIP" = "true" ]; then
+  db_input high $PKG/iservIP || true
+fi
