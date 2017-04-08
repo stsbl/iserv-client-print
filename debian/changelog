@@ -1,3 +1,14 @@
+stsbl-iserv-client-print (17.04.08-0) experimental; urgency=medium
+  
+  [ Felix Jacobi ]
+  * setup_printer:
+    - Improved reliability.
+    - Added support to parse printers.json.
+    - Currently do not delete all CUPS printers to avoid deletion of local printers 
+      (this may create printer zombies, but this will be addressed in a later update).
+
+ -- Stadtteilschule Blankenese <repository@stsbl.de>  Sat, 08 Apr 2017 06:05:56 +0200
+
 stsbl-iserv-client-print (17.04.07-0) experimental; urgency=low
 
   * Initial Release.
