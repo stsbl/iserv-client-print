@@ -350,6 +350,23 @@ sub configure_cups
   }
 
   info "Printers in CUPS: $current_printers";
+ 
+  my $printer;
+  my $printer_location;
+
+  open(IN, 'LC_ALL=C lpstat -l -p|');
+  while(<IN>) {
+    $printer = { 'name'=>'', 'location'=>'' }  if /^\w/;
+    if (/^printer\s(.+?) /) {
+      next if $1 eq 'iserv';
+      $printer->{name} = $1;
+    } elsif (/^\s+Location:\s(.*)$/) {
+      $printer->{location} = $1;
+    }
+    next unless $printer->{name};
+    $printer_location->{$printer->{name}} = $printer->{location};
+  }
+  close IN;
 
   # delete old printers
   foreach my $cups_printer (@cups_printers)
@@ -357,10 +374,16 @@ sub configure_cups
     # don't delete local iserv printer
     next if $cups_printer->getName() eq "IServ";
 
+    # ignore printers without location
+    next if not defined $printer_location->{$cups_printer->getName()};
+
+    # if location is not 'iserv', ignore printer
+    next if not $printer_location->{$cups_printer->getName()} eq "iserv";
+
     # don't delete printers which do not have an equivalence on server side
     # TODO: not safe, could create printer "zombies" on clients, better add 
     # printer with specific mark and select them by mark.
-    next if not defined $server_printers{$cups_printer->getName()};
+    #next if not defined $server_printers{$cups_printer->getName()};
 
     info "Deleting printer ".$cups_printer->getName()." from CUPS.";
     $cups->deleteDestination($cups_printer->getName());
