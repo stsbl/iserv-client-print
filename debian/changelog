@@ -1,3 +1,12 @@
+stsbl-iserv-client-print (17.04.08-1) experimental; urgency=medium
+  
+  [ Felix Jacobi ]
+  * setup_printer: Delete only printers with the location 'iserv'.
+    This should prevent deletion of local printers and should include 
+    old zombie printers which are already deleted on the server.
+
+ -- Stadtteilschule Blankenese <repository@stsbl.de>  Sat, 08 Apr 2017 07:46:24 +0200
+
 stsbl-iserv-client-print (17.04.08-0) experimental; urgency=medium
   
   [ Felix Jacobi ]
