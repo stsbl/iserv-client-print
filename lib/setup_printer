@@ -92,7 +92,7 @@ sub set_default_printer($)
   if (not defined $printers{$default}) 
   {
     undef $default_printer;
-    warning "Ignoring $default as default printer: Currently printer list!" and return;
+    warning "Ignoring $default as default printer: Currently not in printer list!" and return;
   }
 
   if (defined $exclude{$default})
@@ -199,7 +199,7 @@ sub parse_default
   # read local default json
   if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/default.local.json")
   {
-    info "Parsing defaut.local.json ...";
+    info "Parsing default.local.json ...";
     merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/default.local.json";
   }
 }
@@ -320,10 +320,13 @@ sub finalize
     (info "Deleting printer $printer, because it is in exclude list." and delete $printers{$printer}) if defined $exclude{$printer}
   }
 
-  # unset default printer it is not still there
-  if (not $default_printer eq "IServ")
+  if (defined $default_printer)
   {
-    (warning "Unsetting default printer, because $default_printer seems to be gone!" and undef $default_printer) if not defined $printers{$default_printer}
+    # unset default printer it is not still there
+    if (not $default_printer eq "IServ")
+    {
+      (warning "Unsetting default printer, because $default_printer seems to be gone!" and undef $default_printer) if not defined $printers{$default_printer}
+    }
   }
 
   info "Final result:";
