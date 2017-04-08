@@ -13,7 +13,7 @@ if (@ARGV < 1) {
 }
 
 my ($act) = @ARGV;
-my ($server, $room, %printers, %exclude, $default_printer);
+my ($server, $room, %printers, %exclude, %server_printers, $default_printer);
 
 # prevent illegal account names
 die "Invalid account $act!" if not $act =~ /^[a-z][a-z0-9._-]*$/;
@@ -25,13 +25,13 @@ sub info($)
 {
   my ($info) = @_;
   print "[INFO] $info\n";
-};
+}
 
 sub warning(@)
 {
   my ($warning) = @_;
   print "[WARNING] $warning\n";
-};
+}
 
 sub decode_json_file($)
 {
@@ -44,7 +44,7 @@ sub decode_json_file($)
   my $content = join "", @res;
   
   return decode_json $content;
-};
+}
 
 sub add_printers(@)
 {
@@ -53,8 +53,8 @@ sub add_printers(@)
     info "Ignoring printer (it is locally available as IServ)." and next if $p eq "printer";
     info "Adding printer $p.";
     $printers{$p} = 1;
-  };
-};
+  }
+}
 
 sub add_excludes(@)
 {
@@ -63,8 +63,8 @@ sub add_excludes(@)
     info "Ignoring printer (it is locally available as IServ)." and next if $p eq "printer";
     info "Adding printer $p to exclude.";
     $exclude{$p} = 1;
-  };
-};
+  }
+}
 
 sub set_default_printer($)
 {
@@ -87,19 +87,19 @@ sub set_default_printer($)
 
     info $output;
     return;
-  };
+  }
 
   if (not defined $printers{$default}) 
   {
     undef $default_printer;
     warning "Ignoring $default as default printer: Currently printer list!" and return;
-  };
+  }
 
   if (defined $exclude{$default})
   {
     undef $default_printer;
     warning "Ignoring $default as default printer: Printer is in exclude list!" and return;
-  };
+  }
 
   $default_printer = $default;
   $output = "$default is now the default printer";
@@ -109,10 +109,10 @@ sub set_default_printer($)
     $output .= " (replacing $old).";
   } else {
     $output .= ".";
-  };
+  }
 
   info $output;
-};
+}
 
 sub merge_json_file($)
 {
@@ -121,8 +121,15 @@ sub merge_json_file($)
 
   if (defined $hash->{'printers'})
   {
-    add_printers @{$hash->{'printers'}};
-  };
+    # result isn't always an array :/
+    if (ref $hash->{'printers'} eq "ARRAY")
+    {
+      add_printers @{$hash->{'printers'}};
+    } else {
+      my @single_printer = ($hash->{'printers'});
+      add_printers @single_printer;
+    }
+  }
 
   if (defined $hash->{'def'})
   {
@@ -131,9 +138,39 @@ sub merge_json_file($)
 
   if (defined $hash->{'exclude'})
   {
-    add_excludes @{$hash->{'exclude'}};
-  };
-};
+    # result isn't always an array :/
+    if (ref $hash->{'exclude'} eq "ARRAY")
+    {
+      add_excludes @{$hash->{'exclude'}};
+    } else {
+      my @single_exclude = ($hash->{'exclude'});
+      add_printers @single_exclude;
+    }
+  }
+}
+
+sub parse_server_printers
+{
+  return if not -f "/var/lib/iserv/netlogon/$act/Printer Configuration/printers.json";
+ 
+  info "Parsing printers.json ..."; 
+  my $server_printer_info = decode_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/printers.json";
+
+  if (defined $server_printer_info->{'printers'}) 
+  {
+    info "List of all server-side printers: $server_printer_info->{'printers'}";
+    
+    # result isn't always an array :/
+    if (ref $server_printer_info->{'printers'} eq "ARRAY") {
+      foreach my $server_printer (@{$server_printer_info->{'printers'}})
+      {
+        $server_printers{$server_printer} = 1;
+      }
+    } else {
+      $server_printers{$server_printer_info->{'printers'}} = 1;
+    }
+  }
+}
 
 sub parse_default
 {
@@ -152,20 +189,20 @@ sub parse_default
     } else {
       # hardcoded
       $server = "iserv";
-    };
+    }
     
     merge_json_file $json;
   } else {
     die "/var/lib/iserv/netlogon/$act/Printer Configuration/default.json is missing!";
-  };
+  }
 
   # read local default json
   if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/default.local.json")
   {
     info "Parsing defaut.local.json ...";
     merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/default.local.json";
-  };
-};
+  }
+}
 
 sub parse_room
 {
@@ -191,27 +228,27 @@ sub parse_room
   {
     info "Parsing room/$room_name.json ...";
     merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/room/$room_name.json";
-  };
+  }
 
   if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/room.local/$room_name.json")
   {
     info "Parsing room.local/$room_name.json ...";
     merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/room.local/$room_name.json";
-  };
+  }
 
   if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/host/$ip.json")
   {
     info "Parsing host/$ip.json ...";
     merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/host/$ip.json";
-  };
+  }
 
   if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/host.local/$ip.json")
   {
     info "Parsing host.local/$ip.json ...";
     merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/host.local/$ip.json";
-  };
+  }
 
-};
+}
 
 sub parse_group
 {
@@ -221,24 +258,43 @@ sub parse_group
   my $group_info = decode_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/groups.json";
   if (defined $group_info->{"$act"}->{'groups'})
   {
-    my @groups = @{$group_info->{"$act"}->{'groups'}};
-    info "User $act has groups @groups.";
-
-    foreach my $group (@groups)
+    # result isn't always an array :/
+    if (ref $group_info->{"$act"}->{'groups'} eq "ARRAY")
     {
-      next if not -f "/var/lib/iserv/netlogon/$act/Printer Configuration/group/$group.json";
-      info "Parsing group/$group.json ...";
-      merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/group/$group.json";
-    };
+      my @groups = @{$group_info->{"$act"}->{'groups'}};
+      info "User $act has groups @groups.";
 
-    foreach my $group (@groups)
-    {
-      next if not -f "/var/lib/iserv/netlogon/$act/Printer Configuration/group.local/$group.json";
-      info "Parsing group.local/$group.json ...";
-      merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/group.local/$group.json";
-    };
-  };
-};
+      foreach my $group (@groups)
+      {
+        next if not -f "/var/lib/iserv/netlogon/$act/Printer Configuration/group/$group.json";
+        info "Parsing group/$group.json ...";
+        merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/group/$group.json";
+      }
+
+      foreach my $group (@groups)
+      {
+        next if not -f "/var/lib/iserv/netlogon/$act/Printer Configuration/group.local/$group.json";
+        info "Parsing group.local/$group.json ...";
+        merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/group.local/$group.json";
+      }
+    } else {
+      my $group = $group_info->{"$act"}->{'groups'};
+      info "user $act has group $group";
+
+      if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/group/$group.json") 
+      {
+        info "Parsing group/$group.json ...";
+        merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/group/$group.json";
+      }
+
+      if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/group.local/$group.json")
+      {
+        info "Parsing group.local/$group.json ...";
+        merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/group.local/$group.json";
+      }
+    }
+  } 
+}
 
 sub parse_user
 {
@@ -246,29 +302,29 @@ sub parse_user
   {
     info "Parsing user/$act.json ...";
     merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/user/$act.json";
-  };
+  }
 
   if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/user.local/$act.json")
   {
     info "Parsing user.local/$act.json ...";
     merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/user.local/$act.json";
-  };
+  }
 
-};
+}
 
 sub finalize
 {
   # remove excluded printers
   foreach my $printer (keys %printers)
   {
-    (info "Deleting printer $printer, because it is in exclude list." and delete $printers{$printer}) if defined $exclude{$printer};
-  };
+    (info "Deleting printer $printer, because it is in exclude list." and delete $printers{$printer}) if defined $exclude{$printer}
+  }
 
   # unset default printer it is not still there
   if (not $default_printer eq "IServ")
   {
-    (warning "Unsetting default printer, because $default_printer seems to be gone!" and undef $default_printer) if not defined $printers{$default_printer};
-  };
+    (warning "Unsetting default printer, because $default_printer seems to be gone!" and undef $default_printer) if not defined $printers{$default_printer}
+  }
 
   info "Final result:";
   my @final_printers = keys %printers;
@@ -278,8 +334,8 @@ sub finalize
   if (defined $default_printer)
   { 
     info "Default printer: $default_printer";
-  };
-};
+  }
+}
 
 sub configure_cups
 {
@@ -291,7 +347,7 @@ sub configure_cups
   foreach my $cups_printer (@cups_printers)
   {
     $current_printers .= $cups_printer->getName()." ";
-  };
+  }
 
   info "Printers in CUPS: $current_printers";
 
@@ -301,9 +357,14 @@ sub configure_cups
     # don't delete local iserv printer
     next if $cups_printer->getName() eq "IServ";
 
+    # don't delete printers which do not have an equivalence on server side
+    # TODO: not safe, could create printer "zombies" on clients, better add 
+    # printer with specific mark and select them by mark.
+    next if not defined $server_printers{$cups_printer->getName()};
+
     info "Deleting printer ".$cups_printer->getName()." from CUPS.";
     $cups->deleteDestination($cups_printer->getName());
-  };
+  }
 
   # add new printers
   foreach my $printer (keys %printers)
@@ -319,10 +380,11 @@ sub configure_cups
     {
       info "Setting $default_printer as server default.";
       system "lpadmin", "-d", $default_printer;
-    }; 
-  };
-};
+    } 
+  }
+}
 
+parse_server_printers;
 parse_default;
 parse_room;
 parse_group;
