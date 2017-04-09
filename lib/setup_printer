@@ -317,7 +317,7 @@ sub finalize
   # remove excluded printers
   foreach my $printer (keys %printers)
   {
-    (info "Deleting printer $printer, because it is in exclude list." and delete $printers{$printer}) if defined $exclude{$printer}
+    (info "Deleting printer $printer, because it is in exclude list." and delete $printers{$printer}) if defined $exclude{$printer};
   }
 
   if (defined $default_printer)
@@ -325,7 +325,7 @@ sub finalize
     # unset default printer it is not still there
     if (not $default_printer eq "IServ")
     {
-      (warning "Unsetting default printer, because $default_printer seems to be gone!" and undef $default_printer) if not defined $printers{$default_printer}
+      (warning "Unsetting default printer, because $default_printer seems to be gone!" and undef $default_printer) if not defined $printers{$default_printer};
     }
   }
 
@@ -385,7 +385,7 @@ sub configure_cups
 
     # don't delete printers which do not have an equivalence on server side
     # TODO: not safe, could create printer "zombies" on clients, better add 
-    # printer with specific mark and select them by mark.
+    # printer with specific mark and select them by mark. <-- SOLVED - see above
     #next if not defined $server_printers{$cups_printer->getName()};
 
     info "Deleting printer ".$cups_printer->getName()." from CUPS.";
