@@ -1,3 +1,18 @@
+stsbl-iserv-client-print (17.06.30-0) experimental; urgency=medium
+
+  [ Felix Jacobi ]
+  * bug fixes:
+    Fixed usage of undefined $default_printer.
+    Fixed typos.
+    Improved warning on non existing default printer.
+  * setup_printer: Minor syntax and documentation fixes.
+  * Updated build deps and rules.
+  * Fixed build deps.
+  * Fixed multiple ip issues.
+  * Updated build rules and deps.
+
+ -- Stadtteilschule Blankenese <repository@stsbl.de>  Fri, 30 Jun 2017 23:15:10 +0200
+
 stsbl-iserv-client-print (17.04.08-1) experimental; urgency=medium
   
   [ Felix Jacobi ]
