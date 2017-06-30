@@ -17,8 +17,8 @@ binary-indep:
 	dh_gencontrol
 	cp -a $(CURDIR)/debian/postinst $(CURDIR)/debian/stsbl-iserv-client-print/DEBIAN/
 	cp -a $(CURDIR)/debian/postrm $(CURDIR)/debian/stsbl-iserv-client-print/DEBIAN/
-	cp -a $(CURDIR)/debian/prerm $(CURDIR)/debian/stsbl-iserv-client-print/DEBIAN/
 	cp -a $(CURDIR)/debian/config $(CURDIR)/debian/stsbl-iserv-client-print/DEBIAN/
+	cp -a $(CURDIR)/debian/templates $(CURDIR)/debian/stsbl-iserv-client-print/DEBIAN/
 	dh_md5sums
 	dh_builddeb
 
