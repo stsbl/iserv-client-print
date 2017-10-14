@@ -158,7 +158,7 @@ sub parse_server_printers
 
   if (defined $server_printer_info->{'printers'}) 
   {
-    info "List of all server-side printers: $server_printer_info->{'printers'}";
+    info "List of all server-side printers: ".join " ", $server_printer_info->{'printers'};
     
     # result isn't always an array :/
     if (ref $server_printer_info->{'printers'} eq "ARRAY") {
@@ -352,8 +352,9 @@ sub configure_cups
     $current_printers .= $cups_printer->getName()." ";
   }
 
-  info "Printers in CUPS: $current_printers";
- 
+  info "Printers in CUPS: $current_printers"
+   if $current_printers; 
+
   my $printer;
   my $printer_location;
 
