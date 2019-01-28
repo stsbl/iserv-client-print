@@ -15,16 +15,17 @@ chkNetlogon() {
   fi
 
   ## remove old lines
-  NUM=$RANDOM
+  TMP=$(mktemp)
+  chmod 0600 "$TMP"
   # sed does not deletes the lines on direct editing ?:(
-  sed '/<\!-- IServ Print BEGIN -->/,/<\!-- IServ Print END -->/d' /etc/iserv/security/pam_mount.conf.xml > "/tmp/pam_mount.conf-$NUM"".xml"
+  sed '/<\!-- IServ Print BEGIN -->/,/<\!-- IServ Print END -->/d' /etc/iserv/security/pam_mount.conf.xml > "$TMP"
   if [ -L "/etc/security/pam_mount.conf.xml" ]
   then
-    cp "/tmp/pam_mount.conf-$NUM"".xml" "/etc/iserv/security/pam_mount.conf.xml"
+    cp "$TMP" "/etc/iserv/security/pam_mount.conf.xml"
   else
-    cp "/tmp/pam_mount.conf-$NUM"".xml" "/etc/security/pam_mount.conf.xml"
+    cp "$TMP" "/etc/security/pam_mount.conf.xml"
   fi
-  rm -f "/tmp/pam_mount.conf-$NUM"".xml"
+  rm -f "$TMP"
 
   ## add new lines
   String="/Volume\ definitions/a"

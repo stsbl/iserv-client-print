@@ -3,19 +3,24 @@
 # source debconf library
 . /usr/share/debconf/confmodule
 
-## remove lines
-NUM=$RANDOM
-# sed does not deletes the lines on direct editing ?:(
-sed '/<\!-- IServ Print BEGIN -->/,/<\!-- IServ Print END -->/d' /etc/iserv/security/pam_mount.conf.xml > "/tmp/pam_mount.conf-$NUM"".xml"
-if [ -L "/etc/security/pam_mount.conf.xml" ]
+if [ "$1" = "remove" ] || [ "$1" = "purge" ]
 then
-  cp "/tmp/pam_mount.conf-$NUM"".xml" "/etc/iserv/security/pam_mount.conf.xml"
-else
-  cp "/tmp/pam_mount.conf-$NUM"".xml" "/etc/security/pam_mount.conf.xml"
-fi
-rm -f "/tmp/pam_mount.conf-$NUM"".xml"
+  ## remove lines
+  TMP="$(mktemp)"
+  chmod 0600 "$TMP"
 
-if [ "$1" = purge ]
+  # sed does not deletes the lines on direct editing ?:(
+  sed '/<\!-- IServ Print BEGIN -->/,/<\!-- IServ Print END -->/d' /etc/iserv/security/pam_mount.conf.xml > "$TMP"
+  if [ -L "/etc/security/pam_mount.conf.xml" ]
+  then
+    cp "$TMP" "/etc/iserv/security/pam_mount.conf.xml"
+  else
+    cp "$TMP" "/etc/security/pam_mount.conf.xml"
+  fi
+  rm -f "$TMP"
+fi
+
+if [ "$1" = "purge" ]
 then
   db_purge
 fi
