@@ -29,7 +29,7 @@ chkNetlogon() {
   ## add new lines
   String="/Volume\ definitions/a"
   String+="<\!-- IServ Print BEGIN -->\n"
-  String+="<volume uid=\"10000-100000\" fstype=\"cifs\" server=\"$SERVERIP\" "
+  String+="<volume uid=\"100000-199999\" fstype=\"cifs\" server=\"$SERVERIP\" "
   String+="path=\"netlogon\" mountpoint=\"/var/lib/iserv/netlogon/\%(USER)\" options=\""
   String+="iocharset=utf8,dir_mode=0700\" \/>\n"
   String+="<\!-- IServ Print END -->\n"
