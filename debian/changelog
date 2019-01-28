@@ -1,3 +1,9 @@
+stsbl-iserv-client-print (19.01.28-2) experimental; urgency=medium
+
+  * Fixed support for SMB1
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Mon, 28 Jan 2019 02:12:13 +0100
+
 stsbl-iserv-client-print (19.01.28-1) experimental; urgency=medium
 
   * setup_printer: Fixed some perl errors
