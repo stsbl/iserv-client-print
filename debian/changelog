@@ -1,8 +1,9 @@
 stsbl-iserv-client-print (19.01.28-4) experimental; urgency=medium
 
+  * Fixed linitian override
   * Finalized packaging
 
- -- Felix Jacobi <Felix@jacobi-hamburg.net>  Mon, 28 Jan 2019 02:25:02 +0100
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Mon, 28 Jan 2019 02:26:20 +0100
 
 stsbl-iserv-client-print (19.01.28-3) experimental; urgency=medium
 
