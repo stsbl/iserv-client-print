@@ -2,9 +2,9 @@ Source: stsbl-iserv-client-print
 Section: misc
 Priority: extra
 Maintainer: Stadtteilschule Blankenese <repository@stsbl.de>
-Build-Depends: debhelper (>= 9)
+Build-Depends: debhelper (>= 10)
 Build-Depends-Indep: iserv3-dev
-Standards-Version: 3.9.5
+Standards-Version: 4.3.0
 Homepage: https://it.stsbl.de/doc/client/stsbl-iserv-client-print
 
 Package: stsbl-iserv-client-print

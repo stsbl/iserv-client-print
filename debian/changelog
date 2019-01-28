@@ -1,6 +1,6 @@
 stsbl-iserv-client-print (19.01.28-3) experimental; urgency=medium
 
-  * Fixed dependencies and mode maintainance scripts secure
+  * Fixed dependencies and mode maintenance scripts secure
 
  -- Felix Jacobi <Felix@jacobi-hamburg.net>  Mon, 28 Jan 2019 02:17:58 +0100
 
