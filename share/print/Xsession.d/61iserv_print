@@ -1,12 +1,29 @@
 #!/bin/sh
 
-if [ $(id -u) -ge 10000 -a $(id -u) -le 100000 ]
+if [ -z "$1" ]
 then
-  echo "IServ - Setting up printers ..."
+  nohup "$0" fork &> /dev/null &
+  exit 0
+fi
+
+exec &> "$HOME/.iserv/printer-setup.log"
+
+echo "IServ - Setting up printers ..."
+
+MNT="/var/lib/iserv/netlogon/$USER"
+
+while ! mountpoint -q "$MNT"
+do
+  echo "$MNT not mounted yet. Waiting ..."
+  sleep 1
+done
+
+if [ $(id -u) -ge 100000 -a $(id -u) -le 199999 ]
+then
   if [ ! -d "$HOME/.iserv" ]
   then
     mkdir -pv "$HOME/.iserv"
   fi
-
-  sudo /usr/lib/iserv/setup_printer "$USER" &> "$HOME/.iserv/printer-setup.log"
+  echo "Executing setup script ..."
+  sudo /usr/lib/iserv/setup_printer
 fi
