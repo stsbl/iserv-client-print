@@ -1,3 +1,10 @@
+stsbl-iserv-client-print (19.11.09-2) stable; urgency=medium
+
+  * Updated priority
+  * Made setup_printer more secure and robust
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Sat, 09 Nov 2019 21:26:38 +0100
+
 stsbl-iserv-client-print (19.11.09-1) stable; urgency=medium
 
   * Fixed typo
