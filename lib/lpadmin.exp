@@ -1,0 +1,26 @@
+#!/usr/bin/expect -f
+
+#foreach arg $argv {
+#    puts "arg : $arg"
+#}
+
+# arg : -p
+# arg : DevNull
+# arg : -D
+# arg : Foo
+# arg : -P
+# arg : -v
+# arg : ipp://iserv.felix.test-iserv.de/printers/DevNull
+# arg : -o
+# arg : auth-info-required=username,password
+# arg : iserv.felix.test-iserv.de
+
+set name [lindex $argv 0]
+set description [lindex $argv 1]
+set url [lindex $argv 2]
+set server [lindex $argv 3]
+
+spawn lpadmin -p "$name" -D "Foo" -v "$url" -o auth-info-required=username,password -L "$server"
+expect -re "Password for root"
+send "\r"
+expect

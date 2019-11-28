@@ -159,7 +159,7 @@ sub parse_server_printers
 
   if (defined $server_printer_info->{'printers'}) 
   {
-    info "List of all server-side printers: ".join " ", $server_printer_info->{'printers'};
+    info "List of all server-side printers: @{ $server_printer_info->{'printers'} }";
     
     # result isn't always an array :/
     if (ref $server_printer_info->{'printers'} eq "ARRAY") {
@@ -400,7 +400,8 @@ sub configure_cups
     info "Adding printer $printer to CUPS.";
     # Net::CUPS sucks in adding printers, so we have to use low-level lpadmin :/
     #$cups->addDestination($printer, "IServ", $printer, "Generic PostScript Printer", "ipp://$server/printers/$printer");
-    system "lpadmin", "-p", $printer, "-D", "$printer @ $server", "-P", "/var/lib/iserv/netlogon/$act/ppd/generic-postscript-printer.ppd", "-v", "ipp://$server/printers/$printer", "-L", "$server";
+    local $ENV{LC_ALL} = "C";
+    system "/usr/lib/iserv/lpadmin.exp", $printer, "$printer @ $server", "ipp://$server/printers/$printer", $server;
     # start printer
     system "lpadmin", "-p", $printer, "-E";
     # set default printer

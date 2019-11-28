@@ -11,10 +11,12 @@ Package: stsbl-iserv-client-print
 Architecture: all
 Depends: ${misc:Depends},
   ${perl:Depends},
+  expect,
   iserv-client,
   libnet-address-ip-local-perl,
   libjson-perl,
   libnet-cups-perl,
+  sudo,
 Description: IServ Client Integration - Druckunterstützung
  IServ ist nicht nur der perfekte Server für das lokale Netzwerk, IServ
  ist vor allem ein mächtiger Kommunikationsserver, der eine neue,

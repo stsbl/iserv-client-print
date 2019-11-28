@@ -1,29 +1,3 @@
 #!/bin/sh
 
-if [ -z "$1" ]
-then
-  nohup "$0" fork &> /dev/null &
-  exit 0
-fi
-
-exec &> "$HOME/.iserv/printer-setup.log"
-
-echo "IServ - Setting up printers ..."
-
-MNT="/var/lib/iserv/netlogon/$USER"
-
-while ! mountpoint -q "$MNT"
-do
-  echo "$MNT not mounted yet. Waiting ..."
-  sleep 1
-done
-
-if [ $(id -u) -ge 100000 -a $(id -u) -le 199999 ]
-then
-  if [ ! -d "$HOME/.iserv" ]
-  then
-    mkdir -pv "$HOME/.iserv"
-  fi
-  echo "Executing setup script ..."
-  sudo /usr/lib/iserv/setup_printer
-fi
+/usr/lib/iserv/printer_login_hook
