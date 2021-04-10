@@ -2,21 +2,20 @@ Source: stsbl-iserv-client-print
 Section: misc
 Priority: optional
 Maintainer: Stadtteilschule Blankenese <repository@stsbl.de>
-Build-Depends: debhelper (>= 10)
-Build-Depends-Indep: iserv3-dev
-Standards-Version: 4.4.1
+Build-Depends: debhelper-compat (= 13), dh-sequence-iserv, dh-sequence-stsbl
+Standards-Version: 4.5.0
 Homepage: https://it.stsbl.de/doc/client/stsbl-iserv-client-print
 
 Package: stsbl-iserv-client-print
 Architecture: all
-Depends: ${misc:Depends},
-  ${perl:Depends},
-  expect,
-  iserv-client,
-  libnet-address-ip-local-perl,
-  libjson-perl,
-  libnet-cups-perl,
-  sudo,
+Depends: expect,
+         iserv-client,
+         libjson-perl,
+         libnet-address-ip-local-perl,
+         libnet-cups-perl,
+         sudo,
+         ${misc:Depends},
+         ${perl:Depends}
 Description: IServ Client Integration - Druckunterstützung
  IServ ist nicht nur der perfekte Server für das lokale Netzwerk, IServ
  ist vor allem ein mächtiger Kommunikationsserver, der eine neue,
