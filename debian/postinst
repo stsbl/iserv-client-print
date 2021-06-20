@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash
+set -e
 
 # Source debconf library
 . /usr/share/debconf/confmodule
@@ -75,3 +76,4 @@ then
   chkNetlogon
 fi
 
+#DEBHELPER#

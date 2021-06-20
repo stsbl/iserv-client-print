@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash
+set -e
 
 # source debconf library
 . /usr/share/debconf/confmodule
@@ -25,3 +26,4 @@ then
   db_purge
 fi
 
+#DEBHELPER#
