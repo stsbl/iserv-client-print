@@ -13,6 +13,8 @@ unless (defined $ENV{SUDO_USER} and not @ARGV) {
   exit 1;
 }
 
+my ($ip, $room_name);
+
 my $act = $ENV{SUDO_USER};
 my ($server, $room, %printers, %exclude, %server_printers, $default_printer);
 
@@ -43,13 +45,13 @@ sub decode_json_file($)
   my @res = <$fp>;
   close $fp;
   my $content = join "", @res;
-  
+
   return decode_json $content;
 }
 
 sub add_printers(@)
 {
-  foreach my $p (@_) 
+  foreach my $p (@_)
   {
     info "Ignoring printer (it is locally available as IServ-Drucker)." and next if $p eq "printer";
     info "Adding printer $p.";
@@ -72,7 +74,7 @@ sub set_default_printer($)
   my ($default) = @_;
   my $old = $default_printer;
   my $output;
- 
+
   # workaround for IServ printer
   if ($default eq "printer")
   {
@@ -88,18 +90,6 @@ sub set_default_printer($)
 
     info $output;
     return;
-  }
-
-  if (not defined $printers{$default}) 
-  {
-    undef $default_printer;
-    warning "Ignoring $default as default printer: Currently not in printer list!" and return;
-  }
-
-  if (defined $exclude{$default})
-  {
-    undef $default_printer;
-    warning "Ignoring $default as default printer: Printer is in exclude list!" and return;
   }
 
   $default_printer = $default;
@@ -153,14 +143,14 @@ sub merge_json_file($)
 sub parse_server_printers
 {
   return if not -f "/var/lib/iserv/netlogon/$act/Printer Configuration/printers.json";
- 
-  info "Parsing printers.json ..."; 
+
+  info "Parsing printers.json ...";
   my $server_printer_info = decode_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/printers.json";
 
-  if (defined $server_printer_info->{'printers'}) 
+  if (defined $server_printer_info->{'printers'})
   {
     info "List of all server-side printers: @{ $server_printer_info->{'printers'} }";
-    
+
     # result isn't always an array :/
     if (ref $server_printer_info->{'printers'} eq "ARRAY") {
       foreach my $server_printer (@{$server_printer_info->{'printers'}})
@@ -181,9 +171,9 @@ sub parse_default
     info "Parsing default.json ...";
     my $json = "/var/lib/iserv/netlogon/$act/Printer Configuration/default.json";
     my $default = decode_json_file $json;
-  
+
     # determine print server
-    if (defined $default->{'server'}) 
+    if (defined $default->{'server'})
     {
       $server = $default->{'server'};
       info "Printer server is $server.";
@@ -191,7 +181,7 @@ sub parse_default
       # hardcoded
       $server = "iserv";
     }
-    
+
     merge_json_file $json;
   } else {
     die "/var/lib/iserv/netlogon/$act/Printer Configuration/default.json is missing!";
@@ -207,23 +197,7 @@ sub parse_default
 
 sub parse_room
 {
-  return if not -f "/var/lib/iserv/netlogon/$act/Printer Configuration/rooms.json";
-
-  # get the room where we are
-  my $room_name;
-  my $ip = Net::Address::IP::Local->public_ipv4;
-  info "Current IP is $ip.";
-
-  my $room_info = decode_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/rooms.json";
-
-  if (defined $room_info->{"i$ip"}{'room'})
-  {
-    $room_name = $room_info->{"i$ip"}{'room'};
-    info "Current room is $room_name.";
-  } else {
-    $room_name = "";
-    warning "Couldn't determine room name!";
-  }
+  return unless defined $room_name;
 
   if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/room/$room_name.json")
   {
@@ -282,7 +256,7 @@ sub parse_group
       my $group = $group_info->{"$act"}->{'groups'};
       info "user $act has group $group";
 
-      if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/group/$group.json") 
+      if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/group/$group.json")
       {
         info "Parsing group/$group.json ...";
         merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/group/$group.json";
@@ -293,8 +267,20 @@ sub parse_group
         info "Parsing group.local/$group.json ...";
         merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/group.local/$group.json";
       }
+
+      if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/room-group/$room_name/$group.json")
+      {
+        info "Parsing room-group/$room_name/$group.json ...";
+        merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/room-group/$room_name/$group.json";
+      }
+
+      if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/room-group.local/$room_name/$group.json")
+      {
+        info "Parsing room-group.local/$group.json ...";
+        merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/room-group.local/$room_name/$group.json";
+      }
     }
-  } 
+  }
 }
 
 sub parse_user
@@ -311,6 +297,17 @@ sub parse_user
     merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/user.local/$act.json";
   }
 
+  if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/room-user/$act.json")
+  {
+    info "Parsing room-user/$room_name/$act.json ...";
+    merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/room-user/$act.json";
+  }
+
+  if (-f "/var/lib/iserv/netlogon/$act/Printer Configuration/room-user.local/$act.json")
+  {
+    info "Parsing room-user.local/$act.json ...";
+    merge_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/room-user.local/$act.json";
+  }
 }
 
 sub finalize
@@ -336,7 +333,7 @@ sub finalize
   my @final_exclude = keys %exclude;
   info "Exclude: @final_exclude";
   if (defined $default_printer)
-  { 
+  {
     info "Default printer: $default_printer";
   }
 }
@@ -347,14 +344,14 @@ sub configure_cups
 
   my @cups_printers = $cups->getDestinations();
   my $current_printers;
-  
+
   foreach my $cups_printer (@cups_printers)
   {
     $current_printers .= $cups_printer->getName()." ";
   }
 
   info "Printers in CUPS: $current_printers"
-   if $current_printers; 
+   if $current_printers;
 
   my $printer;
   my $printer_location;
@@ -386,7 +383,7 @@ sub configure_cups
     next if not $printer_location->{$cups_printer->getName()} eq "iserv";
 
     # don't delete printers which do not have an equivalence on server side
-    # TODO: not safe, could create printer "zombies" on clients, better add 
+    # TODO: not safe, could create printer "zombies" on clients, better add
     # printer with specific mark and select them by mark. <-- SOLVED - see above
     #next if not defined $server_printers{$cups_printer->getName()};
 
@@ -409,8 +406,22 @@ sub configure_cups
     {
       info "Setting $default_printer as server default.";
       system "lpadmin", "-d", $default_printer;
-    } 
+    }
   }
+}
+
+# get the room where we are
+$ip = Net::Address::IP::Local->public_ipv4;
+info "Current IP is $ip.";
+
+my $room_info = decode_json_file "/var/lib/iserv/netlogon/$act/Printer Configuration/rooms.json";
+
+if (defined $room_info->{"i$ip"}{'room'})
+{
+  $room_name = $room_info->{"i$ip"}{'room'};
+  info "Current room is $room_name.";
+} else {
+  warning "Couldn't determine room name!";
 }
 
 parse_server_printers;

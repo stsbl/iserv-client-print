@@ -13,14 +13,14 @@ echo "IServ - Setting up printers ..."
 
 MNT="/var/lib/iserv/netlogon/$USER"
 
-while ! mountpoint -q "$MNT"
-do
-  echo "$MNT not mounted yet. Waiting ..."
-  sleep 1
-done
-
-if [ $(id -u) -ge 100000 -a $(id -u) -le 199999 ]
+if /usr/lib/iserv/isiservuser "$(id -u)"
 then
+  while ! mountpoint -q "$MNT"
+  do
+    echo "$MNT not mounted yet. Waiting ..."
+    sleep 1
+  done
+
   if [ ! -d "$HOME/.iserv" ]
   then
     mkdir -pv "$HOME/.iserv"
