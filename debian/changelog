@@ -1,3 +1,10 @@
+stsbl-iserv-client-print (21.09.20.1) stable; urgency=medium
+
+  * Fixed support for AD clients, added support for room-group and room-
+    user
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Mon, 20 Sep 2021 21:58:11 +0200
+
 stsbl-iserv-client-print (21.08.17.1) stable; urgency=medium
 
   * Switched to git source format
